@@ -29,7 +29,7 @@ If you want to run this code yourself or contribute:
 
 1. **Clone the repo:**
 ```bash
-git clone https://github.com/yourusername/exarlo-uplink.git
+git clone https://github.com/exar1o/tempmail.exarlo.xyz.git
 ```
 
 2. **Configuration:**

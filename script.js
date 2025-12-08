@@ -1,14 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const CLIENT_TOKEN = "REPLACE_WITH_REAL_TOKEN"; 
-    const CUSTOM_DOMAIN_ID = "REPLACE_WITH_DOMAIN_ID";  
+    // === CONFIGURATION ===
+    const CLIENT_TOKEN = "EXARLO_OFFICIAL_V1"; 
+    const CUSTOM_DOMAIN_ID = "RG9tYWluOjgw"; 
+
     const TARGET_URL = `https://dropmail.me/api/graphql/${CLIENT_TOKEN}`;
+
     const API_URL = `https://corsproxy.io/?${encodeURIComponent(TARGET_URL)}`;
     const POLL_INTERVAL = 8000;
 
+    // === STATE ===
     let sessionID = null;
     let currentAddress = null;
     let knownMailIds = new Set(); 
 
+    // === UI REFERENCES ===
     const ui = {
         emailInput: document.getElementById('email-address'),
         inboxList: document.getElementById('inbox-list'),
@@ -24,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         closeBtns: document.querySelectorAll('.close-modal-btn, .close-modal-action')
     };
 
+    // === API HANDLER ===
     async function gqlQuery(query, variables = {}) {
         try {
             const response = await fetch(API_URL, {
@@ -42,10 +48,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // === CORE LOGIC ===
     async function initSession() {
         if(ui.statusLabel) ui.statusLabel.innerText = "NEGOTIATING_UPLINK...";
         
         let mutation;
+        // Request session with custom domain if ID is provided
         if (CUSTOM_DOMAIN_ID) {
             mutation = `mutation { introduceSession(input: { withAddress: true, domainId: "${CUSTOM_DOMAIN_ID}" }) { id addresses { address } } }`;
         } else {
@@ -93,12 +101,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // === OTP PARSER ===
     function findOTP(text) {
         if (!text) return null;
+        // Looks for 4-8 digit codes
         const matches = text.match(/\b\d{4,8}\b/g);
         return matches ? matches[0] : null;
     }
 
+    // === RENDER UI ===
     function renderInbox(mails) {
         const sorted = [...mails].reverse();
         
@@ -149,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // === UTILS ===
     window.copyOTP = (code, btn) => {
         navigator.clipboard.writeText(code);
         const original = btn.innerText;
@@ -169,6 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
+    // === EVENT LISTENERS ===
     if(ui.copyBtn) {
         ui.copyBtn.addEventListener('click', () => {
             if(currentAddress) {
@@ -194,5 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ui.closeBtns.forEach(btn => btn.addEventListener('click', () => ui.modal.classList.remove('show')));
 
+    // Start App
     initSession();
 });
