@@ -1,0 +1,143 @@
+:root {
+    --bg-color: #050505;
+    --term-green: #0f0;
+    --term-green-dim: #008800;
+    --term-gray: #333;
+    --term-text: #e0e0e0;
+    --font-mono: 'Courier New', Courier, monospace;
+    --accent-red: #ff3333;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background-color: var(--bg-color);
+    color: var(--term-text);
+    font-family: var(--font-mono);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+.scanlines {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+    background-size: 100% 4px; pointer-events: none; z-index: 999;
+}
+
+.glitch {
+    font-size: 3rem; color: var(--term-text);
+    text-shadow: 2px 2px var(--term-green);
+    position: relative; display: inline-block;
+}
+
+.container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+.section { padding: 40px 0; min-height: 80vh; }
+
+.navbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem 2rem; border-bottom: 1px solid var(--term-green-dim);
+    background: rgba(0, 0, 0, 0.9); position: sticky; top: 0; z-index: 100;
+}
+.nav-logo { color: var(--term-green); font-weight: bold; font-size: 1.5rem; }
+.nav-links { list-style: none; display: flex; gap: 2rem; }
+.nav-links a { color: var(--term-text); text-decoration: none; }
+.nav-links a:hover, .nav-links a.active { color: var(--term-green); text-shadow: 0 0 8px var(--term-green); }
+
+.terminal-window {
+    background: #000; border: 1px solid var(--term-green-dim);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.1); border-radius: 4px;
+    margin-top: 1rem; overflow: hidden;
+}
+.terminal-header {
+    background: var(--term-gray); padding: 5px 10px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--term-green-dim);
+}
+.terminal-header .buttons span {
+    display: inline-block; width: 10px; height: 10px;
+    border-radius: 50%; margin-right: 5px;
+}
+.close { background: #ff5f56; } .minimize { background: #ffbd2e; } .maximize { background: #27c93f; }
+.terminal-header .title { color: #fff; font-size: 0.8rem; opacity: 0.7; width: 100%; text-align: center; }
+.terminal-body { padding: 20px; font-size: 0.95rem; color: var(--term-green); }
+
+.email-display-wrapper {
+    display: flex; align-items: center; background: #111;
+    border: 1px solid var(--term-green); padding: 10px; margin-bottom: 15px;
+}
+#email-address {
+    background: transparent; border: none; color: #fff;
+    font-family: var(--font-mono); font-size: 1.2rem; flex-grow: 1; outline: none;
+    min-width: 0; /* Prevent overflow on mobile */
+}
+.btn-copy {
+    background: var(--term-green-dim); color: #000; border: none;
+    padding: 5px 15px; font-family: var(--font-mono); font-weight: bold;
+    cursor: pointer; white-space: nowrap;
+}
+.btn-copy:hover { background: var(--term-green); }
+.status-blink { animation: blink 2s infinite; }
+
+.inbox-window { min-height: 400px; }
+.email-item {
+    border-bottom: 1px dashed #333; padding: 15px 5px;
+    display: grid; grid-template-columns: 150px 1fr auto; gap: 15px;
+    align-items: center; cursor: pointer; transition: background 0.2s;
+}
+.email-item:hover { background: rgba(0, 255, 0, 0.05); }
+.email-sender { color: #fff; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.email-subject { color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.otp-btn {
+    background: transparent; border: 1px solid var(--term-green);
+    color: var(--term-green); padding: 2px 8px; font-family: var(--font-mono);
+    cursor: copy; margin-left: 10px;
+}
+.otp-btn:hover { background: var(--term-green); color: #000; }
+.read-indicator { color: #555; margin-left: 10px; font-size: 0.8rem; }
+
+.modal {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center;
+}
+.modal.show { display: flex; }
+.modal-content { width: 80%; max-width: 800px; height: 70vh; display: flex; flex-direction: column; }
+.modal-body-scroll { overflow-y: auto; flex-grow: 1; white-space: pre-wrap; color: #ccc; word-wrap: break-word; }
+.email-meta { margin-bottom: 15px; color: #fff; }
+.divider { color: var(--term-gray); margin: 10px 0; }
+.modal-footer { margin-top: 20px; border-top: 1px dashed #333; padding-top: 15px; text-align: right; }
+.close-modal-btn { color: var(--accent-red); cursor: pointer; font-weight: bold; font-size: 1.2rem; }
+
+.prompt { color: var(--term-green); margin-right: 10px; }
+.hero-title { text-align: center; color: #666; margin-bottom: 30px; font-size: 0.8rem; }
+.terminal-alert { color: var(--term-green); font-size: 0.8rem; text-align: center; }
+.terminal-header-display { text-align: center; margin-bottom: 40px; }
+.cmd-btn { background: transparent; border: 1px solid #555; color: #aaa; cursor: pointer; padding: 2px 8px; font-family: var(--font-mono); margin-left: 10px; }
+.cmd-btn:hover { border-color: var(--term-green); color: var(--term-green); }
+footer { text-align: center; padding: 20px; border-top: 1px solid #222; color: #555; font-size: 0.7rem; }
+.footer-accent { color: var(--accent-red); }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+/* === MOBILE RESPONSIVENESS === */
+@media (max-width: 768px) {
+    .navbar { flex-direction: column; gap: 10px; padding: 1rem; }
+    .nav-links { gap: 1rem; width: 100%; justify-content: center; }
+    
+    .email-display-wrapper { flex-direction: column; gap: 10px; }
+    #email-address { width: 100%; text-align: center; font-size: 1rem; }
+    .btn-copy { width: 100%; }
+    
+    .email-item {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        gap: 5px;
+        padding: 15px;
+    }
+    .email-sender { width: 100%; }
+    .email-actions { justify-self: start; margin-top: 5px; }
+    
+    .modal-content { width: 95%; height: 85vh; }
+    .glitch { font-size: 2rem; }
+    .cmd-btn { display: block; width: 100%; margin: 5px 0 0 0; text-align: center; }
+    .modal-footer { text-align: center; }
+}

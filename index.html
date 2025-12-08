@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exarlo | Uplink</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+
+    <nav class="navbar">
+        <div class="nav-logo">&lt;Exarlo/&gt;</div>
+        <ul class="nav-links">
+            <li><a href="#" class="active">./Temp_Mail</a></li>
+            <li><a href="#" id="new-identity-btn">./New_Identity</a></li>
+        </ul>
+    </nav>
+
+    <section id="mail-interface" class="section">
+        <div class="container">
+            <div class="terminal-header-display">
+                <p class="terminal-alert"> > ESTABLISHING SECURE CONNECTION...</p>
+                <h1 class="glitch" data-text="SECURE UPLINK">Temp Mail</h1>
+                <p class="hero-title">Disposable Identity // Encrypted Transport</p>
+            </div>
+
+            <div class="mail-control-panel">
+                <h2 class="section-title"><span class="prompt">root@exarlo:~#</span> ./generate_identity.sh</h2>
+                
+                <div class="terminal-window">
+                    <div class="terminal-header">
+                        <div class="buttons"></div>
+                        <div class="title">random_email.txt</div>
+                    </div>
+                    <div class="terminal-body center-content">
+                        <div class="email-display-wrapper">
+                            <input type="text" id="email-address" value="Initializing..." readonly>
+                            <button id="copy-btn" class="btn-copy" title="Copy to Clipboard">
+                                <span class="btn-text">COPY_ADDR</span>
+                            </button>
+                        </div>
+                        <div class="refresh-timer">
+                            <span class="prompt">status:</span> <span id="connection-status" class="status-blink">WAITING_FOR_PACKETS</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="inbox-panel">
+                <h2 class="section-title"><span class="prompt">root@exarlo:~#</span> tail -f /var/mail/inbox</h2>
+                
+                <div class="terminal-window inbox-window">
+                    <div class="terminal-header">
+                        <div class="title">packet_sniffer</div>
+                        <div class="inbox-controls">
+                            <button id="refresh-btn" class="cmd-btn">./force_refresh</button>
+                        </div>
+                    </div>
+                    <div class="terminal-body" id="inbox-list">
+                        <div class="empty-state">
+                            <p>> Buffer empty.</p>
+                            <p>> Listening for incoming transmission...</p>
+                            <span class="cursor">_</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="email-modal" class="modal">
+        <div class="terminal-window modal-content">
+            <div class="terminal-header">
+                <div class="title">read_packet.exe</div>
+                <div class="buttons">
+                    <span class="close-modal-btn">X</span>
+                </div>
+            </div>
+            <div class="terminal-body modal-body-scroll">
+                <div class="email-meta">
+                    <p><span class="prompt">FROM:</span> <span id="modal-sender"></span></p>
+                    <p><span class="prompt">SUBJECT:</span> <span id="modal-subject"></span></p>
+                </div>
+                <div class="divider">----------------------------------------</div>
+                <pre id="modal-text"></pre>
+                <div class="modal-footer">
+                    <a href="#" id="modal-download" target="_blank" class="cmd-btn">[DOWNLOAD_RAW]</a>
+                    <button class="cmd-btn close-modal-action">[CLOSE_WINDOW]</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>System Online. <span class="footer-accent">NO LOGS KEPT.</span></p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
