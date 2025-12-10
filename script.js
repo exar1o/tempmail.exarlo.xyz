@@ -2,9 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // === CONFIGURATION ===
     const CLIENT_TOKEN = "EXARLO_OFFICIAL_V1"; 
     const CUSTOM_DOMAIN_ID = "RG9tYWluOjgw"; 
-
     const TARGET_URL = `https://dropmail.me/api/graphql/${CLIENT_TOKEN}`;
-
     const API_URL = `https://corsproxy.io/?${encodeURIComponent(TARGET_URL)}`;
     const POLL_INTERVAL = 8000;
 
@@ -12,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let sessionID = null;
     let currentAddress = null;
     let knownMailIds = new Set(); 
+    let pollInterval = null;
 
     // === UI REFERENCES ===
     const ui = {
@@ -21,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         refreshBtn: document.getElementById('refresh-btn'),
         newIdentityBtn: document.getElementById('new-identity-btn'),
         statusLabel: document.getElementById('connection-status'),
+        autoRefreshToggle: document.getElementById('auto-refresh'),
         modal: document.getElementById('email-modal'),
         modalSender: document.getElementById('modal-sender'),
         modalSubject: document.getElementById('modal-subject'),
@@ -53,7 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if(ui.statusLabel) ui.statusLabel.innerText = "NEGOTIATING_UPLINK...";
         
         let mutation;
-        // Request session with custom domain if ID is provided
         if (CUSTOM_DOMAIN_ID) {
             mutation = `mutation { introduceSession(input: { withAddress: true, domainId: "${CUSTOM_DOMAIN_ID}" }) { id addresses { address } } }`;
         } else {
@@ -69,8 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (addr) updateAddress(addr);
             else await generateAddress();
             
-            if(ui.statusLabel) ui.statusLabel.innerText = "LINK_ESTABLISHED";
-            setInterval(fetchEmails, POLL_INTERVAL);
+            updateConnectionStatus('connected');
+            startPolling();
         }
     }
 
@@ -101,10 +100,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function startPolling() {
+        if (pollInterval) clearInterval(pollInterval);
+        pollInterval = setInterval(() => {
+            if (ui.autoRefreshToggle.checked) fetchEmails();
+        }, POLL_INTERVAL);
+    }
+
+    function stopPolling() {
+        if (pollInterval) {
+            clearInterval(pollInterval);
+            pollInterval = null;
+        }
+    }
+
     // === OTP PARSER ===
     function findOTP(text) {
         if (!text) return null;
-        // Looks for 4-8 digit codes
         const matches = text.match(/\b\d{4,8}\b/g);
         return matches ? matches[0] : null;
     }
@@ -148,16 +160,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!knownMailIds.has(mail.id)) {
                 knownMailIds.add(mail.id);
-                if(ui.statusLabel) {
-                    ui.statusLabel.innerText = "PACKET_INTERCEPTED";
-                    ui.statusLabel.style.color = "#0f0";
-                    setTimeout(() => { 
-                        ui.statusLabel.innerText = "LINK_ESTABLISHED"; 
-                        ui.statusLabel.style.color = "inherit";
-                    }, 2000);
-                }
+                updateConnectionStatus('packet_intercepted');
             }
         });
+    }
+
+    // === CONNECTION STATUS ===
+    function updateConnectionStatus(state) {
+        if (!ui.statusLabel) return;
+        
+        const states = {
+            waiting: 'WAITING_FOR_PACKETS',
+            connecting: 'ESTABLISHING_HANDSHAKE...',
+            connected: 'SECURE_CHANNEL_ACTIVE',
+            packet_intercepted: 'PACKET_INTERCEPTED',
+            error: 'CONNECTION_DROPPED'
+        };
+        
+        ui.statusLabel.textContent = states[state] || states.waiting;
+        ui.statusLabel.className = state === 'connected' ? 'status-active' : 'status-blink';
+        
+        if (state === 'packet_intercepted') {
+            ui.statusLabel.style.color = '#0f0';
+            setTimeout(() => { 
+                ui.statusLabel.textContent = states.connected;
+                ui.statusLabel.style.color = 'inherit';
+            }, 2000);
+        }
     }
 
     // === UTILS ===
@@ -190,7 +219,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(btnText) {
                     const original = btnText.innerText;
                     btnText.innerText = "COPIED";
-                    setTimeout(() => btnText.innerText = original, 2000);
+                    ui.copyBtn.classList.add('copy-success');
+                    setTimeout(() => {
+                        btnText.innerText = original;
+                        ui.copyBtn.classList.remove('copy-success');
+                    }, 2000);
                 }
             }
         });
@@ -201,11 +234,45 @@ document.addEventListener('DOMContentLoaded', () => {
     if(ui.newIdentityBtn) {
         ui.newIdentityBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            if(confirm("TERMINATE CURRENT SESSION AND GENERATE NEW ID?")) location.reload();
+            if(confirm("TERMINATE CURRENT SESSION AND GENERATE NEW ID?")) {
+                stopPolling();
+                location.reload();
+            }
         });
     }
 
     ui.closeBtns.forEach(btn => btn.addEventListener('click', () => ui.modal.classList.remove('show')));
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+            e.preventDefault();
+            fetchEmails();
+        }
+        
+        if (e.key === 'Escape') {
+            ui.modal.classList.remove('show');
+        }
+        
+        if ((e.ctrlKey || e.metaKey) && e.key === 'c' && document.activeElement.id === 'email-address') {
+            e.preventDefault();
+            if(currentAddress) {
+                navigator.clipboard.writeText(currentAddress);
+                ui.copyBtn.click();
+            }
+        }
+    });
+
+    // Auto-refresh toggle
+    if (ui.autoRefreshToggle) {
+        ui.autoRefreshToggle.addEventListener('change', (e) => {
+            if (e.target.checked && !pollInterval) {
+                startPolling();
+            } else if (!e.target.checked && pollInterval) {
+                stopPolling();
+            }
+        });
+    }
 
     // Start App
     initSession();

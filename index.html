@@ -7,8 +7,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    
-
     <nav class="navbar">
         <div class="nav-logo">&lt;Exarlo/&gt;</div>
         <ul class="nav-links">
@@ -47,6 +45,8 @@
                 </div>
             </div>
 
+            <div class="section-divider"></div>
+
             <div class="inbox-panel">
                 <h2 class="section-title"><span class="prompt">root@exarlo:~#</span> tail -f /var/mail/inbox</h2>
                 
@@ -54,6 +54,10 @@
                     <div class="terminal-header">
                         <div class="title">packet_sniffer</div>
                         <div class="inbox-controls">
+                            <label class="auto-refresh-toggle">
+                                <input type="checkbox" id="auto-refresh" checked>
+                                <span>AUTO_REFRESH</span>
+                            </label>
                             <button id="refresh-btn" class="cmd-btn">./force_refresh</button>
                         </div>
                     </div>
